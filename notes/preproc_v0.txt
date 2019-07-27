@@ -1,0 +1,19 @@
+pipeline:			generated files:
+
+
+PREPROCESSING
+preproc/read_in.R > 
+preproc/stitch.R >		gen_data/train1.csv , gen_data/test1.csv
+preproc/aggregate.R > 		gen_data/train2.csv
+preproc/validation_split.ipynb	gen_data/master_validation_list.pickle
+
+
+VALIDATION TESTING
+preproc/read_in.R > 
+preproc/stitch.R >		gen_data/train1.csv , gen_data/test1.csv
+preproc/aggregate.R > 		gen_data/train2.csv
+preproc/validation_split.ipynb	gen_data/master_validation_list.pickle
+preproc/test_validation.ipynb	
+
+
+

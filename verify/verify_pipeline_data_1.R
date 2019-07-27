@@ -1,0 +1,16 @@
+y_train_testfold <- read.csv('gen_data/y_train_testfold.csv')
+x_val_testfold <- read.csv('gen_data/x_val_testfold.csv')
+y_val_testfold <- read.csv('gen_data/y_val_testfold.csv')
+x_train_testfold <- read.csv('gen_data/x_train_testfold.csv')
+
+y_train_valfold <- read.csv('gen_data/y_train_valfold.csv')
+x_val_valfold <- read.csv('gen_data/x_val_valfold.csv')
+y_val_valfold <- read.csv('gen_data/y_val_valfold.csv')
+x_train_valfold <- read.csv('gen_data/x_train_valfold.csv')
+
+items0 = read.csv('original_data/items.csv')
+shops0 = read.csv('original_data/shops.csv')
+item_cats0 = read.csv('original_data/item_categories.csv')
+train0 = read.csv('original_data/sales_train.csv.gz')
+test0 = read.csv('original_data/test.csv.gz')
+sample_sub = read.csv('original_data/sample_submission.csv.gz')

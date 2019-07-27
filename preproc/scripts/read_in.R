@@ -1,0 +1,6 @@
+items0 = read.csv('original_data/items.csv')
+shops0 = read.csv('original_data/shops.csv')
+item_cats0 = read.csv('original_data/item_categories.csv')
+train0 = read.csv('original_data/sales_train.csv.gz')
+test0 = read.csv('original_data/test.csv.gz')
+sample_sub = read.csv('original_data/sample_submission.csv.gz')

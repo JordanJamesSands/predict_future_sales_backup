@@ -1,0 +1,86 @@
+pipeline:			generated files:
+
+CLEANING:
+preproc/scripts/stitch.R
+	input: 	original_data directory
+	output:	gen_data/train1.csv
+	desc: merges many dataframes in to one
+
+preproc/scripts/aggregate.R
+	input:	gen_data/train1.csv
+	output:	gen_data/train2.1.csv
+	desc: aggregates data from daily to monthly, dropping price information, does not clip values
+
+preproc/scripts/clip.R
+	input:	gen_data/train2.1.csv
+	output:	gen_data/train2.csv
+	desc: clips aggregate values to [0,20]
+
+
+preproc/scripts/simple_validation_split.ipynb
+	input:	gen_data/train2.csv
+	output:	gen_data/x_train--simple_validation_split.ipynb--.pickle
+		gen_data/y_train--simple_validation_split.ipynb--.pickle
+		gen_data/x_val--simple_validation_split.ipynb--.pickle
+		gen_data/y_val--simple_validation_split.ipynb--.pickle
+	desc: preps data for validation, outputting what is, (at the moment) lists of length 1 containing pandas dfs and series
+	
+ENRICHING (inc. feature engineering)
+
+enrich1.ipynb
+	input: 	gen_data/x_train--simple_validation_split.ipynb--.pickle
+		gen_data/x_val--simple_validation_split.ipynb--.pickle
+	output:	gen_data/test_data_enriched--enrich1.ipynb--.pickle
+
+FITTING/SUBMITTING
+model1/model1_script1.ipynb
+	input:	gen_data/test_data_enriched--enrich1.ipynb--.pickle		python list of enriched x validation data
+		gen_data/x_train--simple_validation_split.ipynb--.pickle	python list of enriched x train data
+		gen_data/y_train--simple_validation_split.ipynb--.pickle	python list of enriched y train data
+		gen_data/y_val--simple_validation_split.ipynb--.pickle		python list of enriched y validation data
+		original_data/test.csv.gz					csv file, original test dataset, this is to properly produce the submission table
+	output:	gen_data/model1sub_'+str(FILE_NUM)+'_--model1_script1.ipynb--.csv	if RUN_ON_TEST==True: outputs this submission file
+	desc:	simple model to build and test pipeline	
+	notes: 	-consider combining this with submission, I already have full_train/test in the last part of the lists
+		-combined this with submission, whether or not the model is fitted for validation or test is determined by the value of RUN_ON_TEST, it is automatically written to a file with a name determined by FILE_NUM.
+
+
+
+
+NEW PIPELINE
+
+
+pipeline A
+clean.ipynb (no clip) -> simple_validation_split.ipynb -> enrich.ipynb -> features1,2,3,4 
+
+
+pipeline B
+clean.ipynb (no clip) -> simple_validation_split.ipynb  -> features1,2,3,4 
+
+pipeline C
+clean.ipynb -> simple_validation_split.ipynb -> features1.1 -> --//--.2 _. --//--.3 -> --//-- data_outetc
+
+
+
+
+OLD STUFF
+
+DONT USE THIS?
+
+
+
+preproc/scripts/listify_test.ipynb
+	input:	original_data/test.csv.gz
+	output:	gen_data/test--listify_test.ipynb--.pickle
+	desc: convert test.csv.gz into a pickle file of a python list length 1. this is for compatability reasons, so the same script can be used for validation, (which may have >1 folds) and test
+
+
+preproc/scripts/fill.R
+	input:	gen_data/train2.1.csv
+		original_data/test.csv.gz
+	output:	gen_data/train2.2.csv
+	desc:	training data should include every shop/item pair from test 33 times, (one for each month). Some values are missing because item_cnt_month was 0 for them, these need to be included.
+
+
+
+

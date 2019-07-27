@@ -1,0 +1,393 @@
+---HYPERPARAMS---
+how far back we look, and as such, which dates we drop, (making data wider) (dateback_gen) maybe check dates are dropped accordingly
+the window for target encoding
+filling nas in target encoding with mean or median
+permutation averageing  for expanding mean encoding (if i use it at all)
+kfold mean encoding k
+kfold mean encoding alpha
+NOTES
+just fixed what might be a major bug in simple_validation_split, the x_test[0] data which is training data for month 33 was merged with test data for some reason, wait a second, it was to emulate the test set. Maybe instead i need to properly fill in the information for x_test[0], removing nans. Update, enrich1.ipynb is supposed to do this, but it does it poorly, (there are nans) or is it supposed to have nans?.
+
+
+--------------------- TIER 1 ----------------------------------
+try this
+ensure validation replicates new items, (~7% of test items hadnt been seen before)
+
+try this
+should i do mean encoding or sum encoding?
+
+try this
+clean data more
+	bad shop names
+	mixed up shop_ids
+	outliers
+
+try this
+	finish data prep
+
+try this
+target encoding:
+	do permutation regularisation?
+	take mean/sum sales up to current month for each data point
+		sum is a bad idea, later data would look different
+	maybe historical data is fine
+		but it doesnt work for other cats
+	I THINK ILL USE HISTORICAL DATA BUT RECCODE IT TO WORK WITH OTHER VARS
+try this
+generate preprocessed data with and without clipping
+
+
+try this
+give special consideration to new stuff, 
+	notes:
+		-consider regularise everything toward mean as a function of number of sales
+		-consider encoding how many sales there have been
+		-probe leaderboard for new item behavior
+		-model new item behavior
+
+try this
+verify feat eng data is correct, worried about strange index behavior
+
+try this
+generate a horde of features based on intuition
+	notes: 
+		-still need composition of item cat with other stuffi
+			did itemcat-date and itemcat-date-shopid
+		-consider the name vars
+		-target encodings
+	result:
+try this
+test simple validation
+	idea: test validation using *only* month 33 as validation
+
+try this
+num 0 entries should be similar between val and test, also train
+
+
+
+try this
+complicate validation ofr ensembling purposes
+	-maybe just run the naive model for each month in train instead, stacking with the tree based model
+
+try this
+modelling
+
+try this
+write up
+-------------------- TIER 2 --------------------------------------
+NOTE: during model1.model1_script1.ipynb irreproducible results found, was gettin rmse between 3 and 4, after changes to enrich, it is usually higher, (could be randomness)
+
+
+consider basic encoding for some categorical vars, not all mean encoding
+
+consider uncoupling the dateback for prev month vars and the 'historical' target encodings
+
+days of the week feature engineering
+
+validation split scheme creates validation without item_id or chop_id, contrary to test csv file
+
+think about this
+	idea: consider shop item pairs in validation sets might not have existed back then, this could skew things
+	notes: calidation is close to test time tho, prolly not a problem
+
+
+
+investigate shifting the submission by a factor
+
+try
+weighting the training obs by whether or not theyre in test
+
+
+try
+ensure shop item pairs from test data are included in every month of train?
+maybe just month 32? 31 and 32?
+	notes: demoted to tier 2
+
+
+
+try
+lagged / cumulative over time / mean over time feature engineering
+
+try
+test validation again
+	idea: make sure validation is accurate for more complex models
+
+
+----------------------TIER 3--------------------------
+try
+normalise aggregate data by num days in month
+	notes: demoted this to tier 3
+
+
+try
+running pipeline on command line
+	notes: might be better on linux, maybe next project
+	result:
+
+try
+test_validation:
+	idea: iterate costant solutions, compare validation with public leaderboard
+	notes:
+		-make a neat noetbook creating validation df
+		-this is a nightmare, avoid complicated validation schemes unless they are neccesary
+		-validation split is incorrect, y_val_list does not properly mimic test
+		-prolly dont bother inclusing constant solutions in validation testing, its just gonna show change over time and the constant predictions are designed to fit the public leaderboard anyway
+		-pandas has a 'categorical' column that lightGBM acknowledges by default
+		-TAKE A STEP BACK AND THINK ABOUT WHETHER OR NOT THIS IS FRUITFUL
+		-would liketo label cat features for a model before passing it to the validation function
+			-consider writing a dataprep function for each model and apssing it to validation
+		-redo validation split in python
+		-SWITCHING TO PYTHON
+		-this might be better in python because:
+			-it is more obviously OOP
+			-it is the language taught in the course
+		-use constant predictions, maybe also basic stuff like catboost or target encoding from month before
+		-this can be tied with week2 advice, do previous month target encoding
+		-this can be tied with probe_leaderboard
+	result: JUST GONNA GIVE UP, MAYBE TRY IT LATER, FOR NOW USE MONTH 33 AS VALIDATION
+
+try
+target_encode and XGBoost
+	idea: mean encode some basic variable then run XGboost
+	notes:
+		-i think this was advice
+	result:
+try
+drop old data:
+	idea: drop data from a long time ago
+	notes: 
+		-the model / feature enginering might do this anyway
+	result:
+try
+run catboost after feature engineering
+
+try
+look inside catboost:
+	idea: get an idea of variable importance and interactions
+	notes:
+	result:
+
+try
+investigate the catboost benchmark, make it validate itself timewise
+
+try
+extra precise leaderboard probing?
+	idea:
+	notes:
+		-public leaderboard is approx 35% of data, private is the rest, so getting really specific might not be so fruitful
+	result:
+
+-----------------------------DONE-------------------------------------
+
+Done
+in features1.ipynb y_train_list is reset index but not using map, fix this
+
+
+
+
+
+Done
+drop the date_block_num column, make the data wide
+	notes: just increase dateback_gen (both for train and test) in features1.ipynb to include all but the last month. Then drop the appropriate earlier months, (this is already what Im doing, but I only went back 12 months)
+	result: tune this like a hyperparam
+
+
+
+
+Done
+consider dropping shop/item pairs that arnt in test?
+	notes:
+		this could be a bad idea, as there is an oppurtunity to learn from other data
+		this could be a good idea, it will save space
+		this could be a bad idea *if the item/shop pairs are also included in validation* then I could learn from them.
+			-But then validation would be different to test.
+		conclusion: I should drop them
+		-gonna continue for now without doing this, in the coursera course they did not
+
+
+
+
+Done
+need to include all tested shop item pairs for all date_block_nums in all dataframes
+	notes:
+		-Realised this when generating features:
+			-how do i merge lagged data with current? It would seem wrong to go left, rigt or exclusive, wait a second, I should just already have every shop/item/dateblock combo, many of which will be 0 item_cnt_month.
+		-This might create a DF too big, might need to cull 2013 data points early in the pipeline as opposed to doing it later as intended.
+		-In the coursera course, for each month they considered all possible item/shop pairs and in doing so generated many pairs with 0 item_cnt_month. This also means that if an item wasnt sold in that month, it simply doesnt exist for that month.
+	result: For now, I will copy (roughly) the coursera courses idea
+
+
+
+
+Done
+if lagged values are included, early times may be distorted if Nas are converted to 0
+result: dropped early stuff
+
+
+
+
+Done
+many names are missing, replaced with 0s
+result: fixed
+
+
+
+
+Done
+clip values to [0,20] after predictions
+	idea:
+	notes; 
+		atm I am clipping in preprocessing
+		For tree models, it might be better to clip *after* since order is the onlything that matters
+		For non-tree models, it might be best to clip *before* since outliers make trouble. 
+		For non-tree models, consider clipping to [0,21] or even [-1,21]. This way, a distinction is made between very large values and values that are exactly 20.
+		Consider making a NOT_CLIPPED variety of preproc scripts with related output files
+			this will involve:
+				-renaming the existing aggregate.R file to something detailing clipping
+				-more
+	result:	
+		-made a separate script called preproc/clip.R to run after preproc/aggregate.R
+		-removed the clipping from aggregate.R, aggregate now outputs something called train2.1.csv, which is what was trian2.csv, but is not clipped.
+
+
+
+
+Done
+check what to do with negative entries in original daily data
+	result: dont worry about it, just aggregate it *and then* clip it for the month
+
+
+
+Done
+verify data accuracy of data input for modelling
+	idea: ensure data was preprocessed correctly, consider using R for a different perspective
+	result: success, note that this is while clipping training data during preprocessing, not after predictions are made
+
+
+
+Done
+check that clipping is after aggregating
+	result: the true targets are clipped
+
+
+Done
+test the pipeline
+	idea: erase gen_data, (back it up fisrt) then try to reproduce it
+	result: success, pipeline from fresh start created a file identical to the result of previous hacking
+
+Done
+formalise a pipeline
+	idea: need to get organised
+	notes:
+		-2 problems in enrich1.ipynb.
+			-it sets date_block_num to 33 for test
+				-could make full train set an element of pickled train list, but this complicates everything
+			-it hardcodes the training list pickle file, what if I change the pipeline?
+		-create preprocess function that handles train and test/validation ad takes another function to create features
+	
+	result:enrich1.ipynb preprocesses train and test/val without feature engineering, this can be added later. Pipeline reads train and sets date_block_num accordingly, test is carried through on the end of the pickled python lists, and the pickle file is hardcoded but its on the record
+		
+
+
+Done
+	generate x_valid_33 from train_to_32 so that nans are produced, properly mimicing test
+	result: changed enrichment/enrich1.ipynb so that when enriching validation sets, only the relavant training set is used.
+
+
+
+
+Done
+check valid_33 
+	idea: is x_valid_33 the same as test in simple_validation_split.ipynb?
+	result: yes it is, rewrote preproc/simple_validation_split.ipynb accordingly
+
+Done
+drop listify_test
+	idea:	clean pipeline, (drop listify_test?)
+	notes: 	dropped listify, still need to formalise the pipeline
+t
+Done
+reconsider adding test to end of validation list, when I run a sibmission do I wanna use end of list OR go back to start and not partition?
+	result: no im gonna carry test through
+
+
+Done
+check week2 advice work i did
+	idea:
+	notes:
+		-this can be tied with test_validation
+	result: created a python class aggmodel that takes an arg for how many months to aggregate over, using it in validation testing
+
+
+
+Done
+probe_leaderboard:
+	idea: find optimal single value solution, this should be mean of submissions?
+	notes: 
+		-I did this before, look it up
+		-this can be tied in with test validation
+	result: 
+		-0.2875 is best const sol within reason
+		-best is 0.2839853
+		-someone on a kaggle forum pointed out that with two constant entries you can compute it analytically, after doing this I found it to be 0.2839853
+
+
+
+
+DONE
+colour code vim correctly
+	idea: use vim or another editor to code this script with colours
+	notes:
+		-tried atom and notepad++
+		-this is a nightmare
+	result: gave up
+
+
+DONE
+validation:
+	idea: create a validation sample
+	notes: 
+		-For N months, select M as initial training set, validated on M+1'th month, then M+=1, repeat 
+	result: created validation_split.R
+
+	
+DONE
+catboost_benchmark:
+	idea: run catboost on inital data set to get a benchmark
+	notes:
+		-catboost likely didnt validate itself timewise
+		-saved in gen_data/catboost_submission.csv
+		-notebook at eda/scripts/catboost_benchmark.ipynb
+	result: scored 1.86768
+
+
+DONE
+remove outliers
+	idea: remove outliers
+	notes: 
+		-the clipping that mimics competition guidelines took care of outliers
+	result:done, (i clipped sales values)
+
+DONE
+check leak:
+	idea: check test subset to see if its accosiated with any other vars
+	notes:
+		-eda/check_test_sampling.R
+		-dataset too large, try aggregating first, did this
+	result: no obvious relationship between sales and inclusion of item/shop combo in test set
+
+DONE
+aggregate:
+	idea: aggregate train data to make it compatible with test
+	notes: 
+		-need to also clip sales values between [0,20]
+	result: aggregation script is preproc/aggregate.R
+
+	
+DONE
+stitch:
+	idea: merge input data
+	notes; 
+		-drop rows with Nas generated by merging, these contain only items
+	result: done, in preproc/stitch.R
+

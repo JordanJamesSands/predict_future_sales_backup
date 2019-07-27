@@ -1,0 +1,32 @@
+consider group aggregated features:
+
+1 # times item sold worldwide that day/past week etc
+2 # sales made by that store that day/past week etc
+3 above two might only be useful for assessing a temporal trend
+4 try to capture trends leasing up to the end of training set
+5 some features will model relative success of stores
+6 some features will model relative success of items
+feature 1 is groupby (last month and item id) aggregate sum , feature 6 would likely by mean encoding (groupby item id agg mean) these are similar
+
+gather variance of items sold/shop sales, these will determine if we can trust our mean encodings
+
+
+try adding a temporal component, have global mean encoded item id sales, but then also previous month, previous 2 months etc.
+check for shop item interactions?
+
+consider max global price for each item, and min global price for each item (especially this), also SD
+	-perhaps just min global price and sd of price (consider more scaling for larger items we might try harder for a deal)
+	-min global price is obviously a good predictor because distance between it and item price will be negatively related to sales, the sd feature quantifies how powerful the min global price feature is. (if the price varies more were gonna go find a good deal somehwere else?)
+	-note, we dont actually have price in test set
+consider predicting price during test set's time period using mean encoding (perhaps temporal) like above
+
+consider shop item interactions
+consider TOTAL sale trend
+consider day of week
+consider weekday vs not weekday (where does friday belong)
+	-maybe tabulate data by day of week and do statistical tests / trial error in day categorisation (early stopping) to find a good split between high selling days and low selling days.
+	-also, how does this fit into monthly predictions? will the model just take care of that?
+	
+consider breaking data in to blocks, (aggregating over blocks) to make the model predict something of the same type as training sample.
+	- also, stagger these to get many observations
+	- use both daily data and monthly data?
